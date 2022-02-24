@@ -1,0 +1,19 @@
+.hand{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.playerHand{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.field{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+}
+.card{
+    width:10vw;
+    height:15vw ;
+}
