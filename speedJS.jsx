@@ -2,7 +2,8 @@ import GameMatch from "./speedSetUp.js"
 
 const game =GameMatch();
 console.log(game);
-
+let selectedId;
+let dropTargetId;
 
 function Card(props){
     var image;
@@ -15,8 +16,57 @@ function Card(props){
     <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} >
        {image}
     </div>
+    
     );
 }
+function checkForMatch(selectedID, dropTargetId){
+    var value=selectedID;
+    var drop=dropTargetId;
+    console.log()
+    if(value == 'JACK'){
+        value=11;
+    }else if(value== 'QUEEN'){
+        value=12;
+    }else if(value== 'KING'){
+        value=13;
+    } else if(value=='ACE'){
+        value="ACE";
+    }else{
+         value=parseInt(selectedID);
+    }
+    if( drop== 'JACK'){
+        drop=11;
+    }else if(drop == 'QUEEN'){
+        drop=12;
+    }else if(drop== 'KING'){
+        drop=13;
+    } else if(drop=='ACE'){
+        drop="ACE";
+    }else{
+     drop=parseInt(dropTargetId);
+    }
+    var higher = drop+1;
+    var lower =drop-1;
+    if(value=="ACE" && drop==2 || drop==13){
+        console.log("ace"+value +""+ drop)
+        return true;
+    }else if(drop=="ACE" && value==2 || value==13){
+        console.log("ace"+value +""+ drop)
+        return true;
+    }else if(value == higher){
+        console.log(higher);
+        console.log("higher "+value +" "+ higher)
+        return true;
+    }else if(value == lower){
+        console.log(lower);
+        console.log("lower "+value +" "+ lower)
+        return true;
+    }else{
+        console.log(value +" "+ drop)
+        return false;
+    }
+}
+ 
 class Board extends React.Component{
     renderField(i){
         if(i<this.props.field.length){
@@ -37,7 +87,7 @@ class Board extends React.Component{
                 drag="true"
                 card={this.props.playerHand[i]}
                 />
-            );  
+            );
             }   
     }
     renderComputer(i){
@@ -51,6 +101,7 @@ class Board extends React.Component{
             );  
             }
     }
+   
     render(){
         return(
             <div className="game">
@@ -91,25 +142,44 @@ class Game extends React.Component{
          computerDeck:game.computerDeck,
          playerOut:game.playerOut,
          computerOut:game.computerOut,
-         selectedId:0,
-         dropTargetId:0
         };
     }
-
-    //renders
-
-   
+    AddEventListeners() {
+        console.log("mount")
+       for(var i=0;i<this.state.playerHand.length;i++){
+        var x =document.getElementById(this.state.playerHand[i].code)
+        x.addEventListener('dragstart', this.dragStart);
+        x.addEventListener('dragover', this.dragOver);
+       }
+       for(var i=0;i<this.state.field.length;i++){
+        var x =document.getElementById(this.state.field[i].code)
+        x.addEventListener('drop', this.dragDrop);
+        x.addEventListener('dragover', this.dragOver);
+       }
+    }
+    componentDidMount(){
+        this.AddEventListeners();
+    }
     //drag and drop functionalit
-    
-    dragStart(){
-        this.setState({
-            selectedId:this.id
-           });
-        console.log(this.state.selectedId);
+     dragStart(){
+        selectedId=document.getElementById(this.id).getAttribute('value');
+        console.log(selectedId);
     }
     dragOver(ev) {
         ev.preventDefault();
     }
+    
+    dragDrop(){
+        dropTargetId=document.getElementById(this.id).getAttribute('value');
+        console.log(dropTargetId);
+       if(checkForMatch(selectedId,dropTargetId)){
+        console.log("match");
+        self.playerHandMatch(selectedId,dropTargetId);
+       }else{
+           console.log("not a match")
+       }
+    }
+    
     calculateWinner(){
         if(this.state.computerHand.length ==0 && this.state.computerDeck.length == 0){
         return ("Computer Wins")
@@ -118,52 +188,29 @@ class Game extends React.Component{
         return("You win!");
         }
     }
-    dragDrop(){
-        this.setState({
-            dropTargetId:this.id
-           });
-        console.log(this.state.dropTargetId);
-    }
-    checkForMatch(selectedID, dropTargetId){
-        var value;
-        var drop;
-        if($(selectedID).value == 'JACK'){
-            value=11;
-        }else if($(selectedID).value == 'QUEEN'){
-            value=12;
-        }else if($(selectedID).value== 'KING'){
-            value=13;
-        } else if($(selectedID).value=='ACE'){
-            value="ACE";
-        }else{
-            value=$(selectedID).value;
+   playerHandMatch =(selectedID,dropTargetId) =>{
+    
+    const newField=this.state.field;
+    const newPlayerHand=this.state.playerHand;
+    const newDeck=this.state.playerDeck;
+    var transfer;
+    for(var i=0; i<newPlayerHand.length;i++){
+        if(newPlayerHand[i].value== selectedID ){
+            transfer= newPlayerHand[i].pop();
         }
-        if($(dropTargetId).value == 'JACK'){
-            drop=11;
-        }else if($(dropTargetId).value == 'QUEEN'){
-            drop=12;
-        }else if($(dropTargetId).value== 'KING'){
-            drop=13;
-        } else if($(dropTargetId).value=='ACE'){
-            drop="ACE";
-        }else{
-            drop=$(dropTargetId).value;
-        }
-
     }
-    AddEventListeners() {
-        console.log("event")
-        const draggableItems = document.querySelectorAll('.playerHand div');
-        console.log(draggableItems)
-        draggableItems.forEach (item => {
-          item.addEventListener('dragstart', dragStart);
-          item.addEventListener('dragenter', dragEnter);
-          item.addEventListener('drop', dragDrop);
-          item.addEventListener('dragover', dragOver);
-          item.addEventListener('dragleave', dragLeave);
-        });
-      }
-
+       for(var i=0; i<newfield.length;i++){
+           if(newField[i].Card.value ==dropTargetId){
+              newField[i]=transfer;
+           }
+       }
+       newPlayerHand.push(newDeck.pop());
+    this.setState({
+        playerHand:newPlayerHand.slice(),
+        playerDeck:newDeck.slice(),
+        field:newField.slice()
+    })
+   }
     //render Board
     render(){
         return(
@@ -173,7 +220,6 @@ class Game extends React.Component{
               field={this.state.field}
               computerHand={this.state.computerHand}
           />
-        {this.AddEventListeners()}
         </div>
         );
     }
@@ -182,6 +228,6 @@ class Game extends React.Component{
 
     ReactDOM.render(
         <Game />,
-        document.getElementById('root')
+        document.getElementById('root'),
     ); 
 
