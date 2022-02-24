@@ -1,152 +1,187 @@
+import GameMatch from "./speedSetUp.js"
 
-function faceUp(props){
-    return(
-        <div className="card">
-        {props.value}
-        </div>
-    );
-}
+const game =GameMatch();
+console.log(game);
 
-function faceDown(props){
-    return(
-        <div className="card" value={props.value}>
-            <img src="faceDown.png" alt={props.code}/>
-        </div>
-    );
-}
-function battleField(props){
-    return(
-        <div className="card" value={props.value}>
-            <img src={props.url} alt={props.code}/>
-        </div>
-    );
-}
 
-class Board extends React.Component{
-    renderCHand(i){
-        return(
-        <faceDown
-        value ={this.props.compHand[i]}
-        onClick={()=> this.props.onClick(i)}
-        />
-        );
+function Card(props){
+    var image;
+    if(props.name=="Computer"){
+    image = <img className="card" src="backOfCard.png" alt={props.card.value}/>
+    }else{
+    image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     }
-    renderPHand(i){
-        return(
-        <faceUp
-        value ={this.props.playerHand[i]}
-        onClick={()=> this.props.onClick(i)}
-        />
-        );
-    }
-    renderField(i){
-        return(
-        <faceUp
-        value ={this.props.Field[i]}
-        onClick={()=> this.props.onClick(i)}
-        />
-        );
-    }
-    render(){
     return(
-    <div className="Board">
-        <div className="Computer">
-        <div className = "Deck" id="CDeckHand" ></div>
-        <div className ="CHand">
-            {this.renderCHand(0)}
-            {this.renderCHand(1)}
-            {this.renderCHand(2)}
-            {this.renderCHand(3)}
-            {this.renderCHand(4)}
-        </div>
-        </div>  
-        <div className="GameField">
-        
-            <div>
-                <div className = "Deck" id="fieldDeck1"></div>
-                <div className = "Deck" id="fieldDeck2"></div>
-            </div>  
-            {this.renderField(0)}
-            {this.renderField(1)}
-        </div> 
-        <div className="Player">
-        <div className = "Deck" id="CDeckHand"></div>
-        <div className ="CHand">
-            {this.renderPHand(0)}
-            {this.renderPHand(1)}
-            {this.renderPHand(2)}
-            {this.renderPHand(3)}
-            {this.renderPHand(4)}
-        </div>
-        </div>      
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} >
+       {image}
     </div>
     );
-    }
 }
-
-class Game extends React.Component{
-    constructor(props){
-        super(props);
-       
-        this.state={
-            playerHand : [],
-            CompHand : [],
-            field : [],
-        };
+class Board extends React.Component{
+    renderField(i){
+        if(i<this.props.field.length){
+        return(
+            <Card 
+            name="Field"
+            drag="false"
+            card={this.props.field[i]}
+            />
+        );  
+        }
     }
-    
+    renderPlayer(i){
+        if(i<this.props.playerHand.length){
+            return(
+                <Card 
+                name="Player"
+                drag="true"
+                card={this.props.playerHand[i]}
+                />
+            );  
+            }   
+    }
+    renderComputer(i){
+        if(i<this.props.computerHand.length){
+            return(
+                <Card 
+                name="Computer"
+                drag="false"
+                card={this.props.computerHand[i]}
+                />
+            );  
+            }
+    }
     render(){
         return(
             <div className="game">
-            <div className="game-board">
-             <Board 
-            squares ={current.squares}
-            onClick={(i) => this.handleClick(i)}
-            />
-            </div>
-            <div className="game-info">
-            <ol>{moves}</ol>
-        </div>
-      </div>
-        );
+            <div className="hand">
+           {this.renderComputer(0)}
+           {this.renderComputer(1)}
+           {this.renderComputer(2)}
+           {this.renderComputer(3)}
+           {this.renderComputer(4)}
+           </div>
+           <div className="field">
+           {this.renderField(0)}
+           {this.renderField(1)}
+           <div className="containerField">
+           <div className="computerOut"></div>
+           <div className="playerOut"></div>
+           </div>
+           </div>
+           <div className="hand">
+           {this.renderPlayer(0)}
+           {this.renderPlayer(1)}
+           {this.renderPlayer(2)}
+           {this.renderPlayer(3)}
+           {this.renderPlayer(4)}
+           </div>
+           </div>
+        )
     }
 }
-function setUpMatch(){
-    //deck ID
-    $.get("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1", function(results){
-        const deckId= results.deck_id;
-   });
-   //player hand
-    $.get("https://deckofcardsapi.com/api/deck/"+deckId+"/pile/playerHand/add/?count=5", function(results){
-        const playerHand =  JSON.parse(results);      
-    });   
-    //player hand deck
-    $.get("https://deckofcardsapi.com/api/deck/"+deckId+"/pile/playerHandDeck/add/?count=15", function(results){
-        console.log(results);      
-    }); 
-    //player draw deck
-    $.get("https://deckofcardsapi.com/api/deck/"+deckId+"/pile/playerDrawDeck/add/?count=5", function(results){
-       console.log(results)     
-    }); 
-    //computer hand
-    $.get("https://deckofcardsapi.com/api/deck/"+deckId+"/pile/computerHand/add/?count=5", function(results){
-       const compHand = JSON.parse(results);
-    }); 
-    //computer hand deck
-    $.get("https://deckofcardsapi.com/api/deck/"+deckId+"/pile/computerHandDraw/add/?count=15", function(results){
-        const compHand = JSON.parse(results);
-     }); 
-    //computer draw deck
-    $.get("https://deckofcardsapi.com/api/deck/"+deckId+"/pile/computerDrawDeck/add/?count=5", function(results){
-        console.log(results);
-     }); 
-    //battle field
-    $.get("https://deckofcardsapi.com/api/deck/"+deckId+"/pile/battleField/add/?count=2", function(results){
-        const field = JSON.parse(results);
-     }); 
+class Game extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+         field:game.fd,
+         playerHand:game.playerHand,
+         playerDeck:game.playerDeck,
+         computerHand:game.computerHand,
+         computerDeck:game.computerDeck,
+         playerOut:game.playerOut,
+         computerOut:game.computerOut,
+         selectedId:0,
+         dropTargetId:0
+        };
     }
 
-$(document).ready(function(){
-    setUpMatch();
+    //renders
+
+   
+    //drag and drop functionalit
     
-});
+    dragStart(){
+        this.setState({
+            selectedId:this.id
+           });
+        console.log(this.state.selectedId);
+    }
+    dragOver(ev) {
+        ev.preventDefault();
+    }
+    calculateWinner(){
+        if(this.state.computerHand.length ==0 && this.state.computerDeck.length == 0){
+        return ("Computer Wins")
+        }
+        else if(this.state.playerHand.lenth ==0 && this.state.playerDeck.length==0){
+        return("You win!");
+        }
+    }
+    dragDrop(){
+        this.setState({
+            dropTargetId:this.id
+           });
+        console.log(this.state.dropTargetId);
+    }
+    checkForMatch(selectedID, dropTargetId){
+        var value;
+        var drop;
+        if($(selectedID).value == 'JACK'){
+            value=11;
+        }else if($(selectedID).value == 'QUEEN'){
+            value=12;
+        }else if($(selectedID).value== 'KING'){
+            value=13;
+        } else if($(selectedID).value=='ACE'){
+            value="ACE";
+        }else{
+            value=$(selectedID).value;
+        }
+        if($(dropTargetId).value == 'JACK'){
+            drop=11;
+        }else if($(dropTargetId).value == 'QUEEN'){
+            drop=12;
+        }else if($(dropTargetId).value== 'KING'){
+            drop=13;
+        } else if($(dropTargetId).value=='ACE'){
+            drop="ACE";
+        }else{
+            drop=$(dropTargetId).value;
+        }
+
+    }
+    AddEventListeners() {
+        console.log("event")
+        const draggableItems = document.querySelectorAll('.playerHand div');
+        console.log(draggableItems)
+        draggableItems.forEach (item => {
+          item.addEventListener('dragstart', dragStart);
+          item.addEventListener('dragenter', dragEnter);
+          item.addEventListener('drop', dragDrop);
+          item.addEventListener('dragover', dragOver);
+          item.addEventListener('dragleave', dragLeave);
+        });
+      }
+
+    //render Board
+    render(){
+        return(
+        <div className="board">
+          <Board 
+              playerHand={this.state.playerHand}
+              field={this.state.field}
+              computerHand={this.state.computerHand}
+          />
+        {this.AddEventListeners()}
+        </div>
+        );
+    }
+    
+}
+
+    ReactDOM.render(
+        <Game />,
+        document.getElementById('root')
+    ); 
+
