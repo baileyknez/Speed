@@ -212,6 +212,7 @@ class Game extends React.Component{
     }
     //drag and drop functionalit
      dragStart(card){
+        playerOutToggle=false;
         selectedId=card.code;
         selectedValue =card.value;
         console.log(selectedValue);
@@ -235,6 +236,9 @@ class Game extends React.Component{
     }
     }
     dragPOStart(ev){
+        if(this.state.playerOut.length==undefined){
+            return null;
+        }
         console.log("player out")
         if(this.checkForValidMove(this.state.playerHand,this.state.field)){
         ev.preventDefault();
