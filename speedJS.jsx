@@ -99,7 +99,11 @@ function checkForMatch(selectedValue, dropTargetValue){
         return false;
     }
 }
- 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+  }
 class Board extends React.Component{
     renderField(i){
         if(i<this.props.field.length){
@@ -127,6 +131,8 @@ class Board extends React.Component{
                 dragOver={(ev)=>this.props.dragOver(ev)}
                 />
             );
+            }else{
+                return(null);
             }   
     }
     renderComputer(i){
@@ -138,29 +144,34 @@ class Board extends React.Component{
                 card={this.props.computerHand[i]}
                 />
             );  
-            }
+            }else{
+                return(null);
+            }   
     }
     renderPlayerOut(){
-        if(this.props.playerOutLength != undefined){
-        return(
-            <PlayerOut
-                name=""
-                drag="true"
-                dragPOStart= {(ev) =>this.props.dragPOStart(ev)}
-                dragOver={(ev)=>this.props.dragOver(ev)}
-            />
-        );
-        }
+        if(this.props.playerOutLength > 0){
+            return(
+                <PlayerOut
+                    name=""
+                    drag="true"
+                    dragPOStart= {(ev) =>this.props.dragPOStart(ev)}
+                    dragOver={(ev)=>this.props.dragOver(ev)}
+                />
+            );
+        }else{
+           return(null);
+        }   
     }
     renderComputerOut(){
-        if(this.props.computerOutLength != undefined){
-            
+        if(this.props.computerOutLength > 0){
             return(
                 <Blank
                     name="ComputerOutDeck"
                 />
             );  
-        }
+        }else{
+            return(null);
+        }   
     }
    
     render(){
@@ -210,6 +221,12 @@ class Game extends React.Component{
         };
         
     }
+    componentDidMount() {
+        this.interval = setInterval(() => this.intervalComp(), 2500);
+      }
+    componentWillUnmount() {
+        clearInterval(this.interval);
+     }
     //drag and drop functionalit
      dragStart(card){
         playerOutToggle=false;
@@ -261,8 +278,8 @@ class Game extends React.Component{
     }
     
    playerHandMatch(){
-    var newField=this.state.field;
-    var newPlayerHand=this.state.playerHand;
+    var newField=this.state.field.slice();
+    var newPlayerHand=this.state.playerHand.slice();
     var newDeck=this.state.playerDeck.slice();
     var transfer;
     for(var i=0; i<newPlayerHand.length;i++){
@@ -312,7 +329,61 @@ class Game extends React.Component{
     }
     return bool;
    }
- 
+   intervalComp(){ 
+    var bool = true;
+    for(var i=0; i< this.state.computerHand.length;i++){
+    for (var x=0;x<this.state.field.length;x++){
+        var com =this.state.computerHand[i].value;
+        var han =this.state.field[x].value;
+        if(checkForMatch(com, han)==true){
+            bool=false;
+            this.compHandMatch(this.state.computerHand[i].code,this.state.field[x].code);
+            break;
+         }
+        }
+        if(bool==false){
+            break;
+        }
+      }
+      if(bool){
+          this.compOut();
+      }
+    }
+    compOut(){
+        let newField=this.state.field.slice();
+        let newOut =this.state.computerOut.slice();
+        let num = Math.round(getRandomInt(0,2));
+        console.log("random "+num);
+        newField[num]=newOut.pop();
+        this.setState({
+            field:newField.slice(),
+            computerOut:newOut.slice()
+        })
+    }
+    compHandMatch(handID, fieldID){
+        let newHand=this.state.computerHand.slice();
+        let newDeck=this.state.computerDeck.slice();
+        let newField=this.state.field.slice();
+        let temp;
+        for(var i=0; i<newHand.length; i++){
+            if(newHand[i].code==handID){
+                temp= newHand.splice(i,1);
+            }
+        }
+        for(var i=0; i<newField.length; i++){
+            if(newField[i].code==fieldID){
+                newField[i]=temp[0];
+            }
+        }
+
+        newHand.push(newDeck.pop());
+        this.setState({
+            field:newField.slice(),
+            computerDeck:newDeck.slice(),
+            computerHand:newHand.slice()
+        })
+
+    }
     //render Board
     render(){
         return(
@@ -338,3 +409,4 @@ class Game extends React.Component{
         <Game />,
         document.getElementById('root'),
     ); 
+
