@@ -6,7 +6,7 @@ let selectedId;
 let dropTargetId;
 let selectedValue;
 let dropTargetValue;
-let playerOutToggle=false;
+
 
 function PlayerCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
@@ -36,16 +36,7 @@ function Card(props){
     
     );
 }
-function PlayerOut(props){
-    var image= <img className="card" src="backOfCard.png" alt="playerOutDeck"/>
-    
-    return(
-    <div draggable="true" className= "playerOut" onDragStart={props.dragPOStart} onDragOver={props.dragOver}>
-       {image}
-    </div>
-    
-    );
-}
+
 function Blank(props){
     return(
             <img className="card" src="backOfCard.png" alt={props.Name}/>
@@ -151,11 +142,9 @@ class Board extends React.Component{
     renderPlayerOut(){
         if(this.props.playerOutLength > 0){
             return(
-                <PlayerOut
+                <Blank
                     name=""
                     drag="true"
-                    dragPOStart= {(ev) =>this.props.dragPOStart(ev)}
-                    dragOver={(ev)=>this.props.dragOver(ev)}
                 />
             );
         }else{
@@ -222,14 +211,13 @@ class Game extends React.Component{
         
     }
     componentDidMount() {
-        this.interval = setInterval(() => this.intervalComp(), getRandomInt(4000,5000));
+        this.interval = setInterval(() => this.intervalComp(), getRandomInt(1000,5000));
       }
     componentWillUnmount() {
         clearInterval(this.interval);
      }
     //drag and drop functionalit
      dragStart(card){
-        playerOutToggle=false;
         selectedId=card.code;
         selectedValue =card.value;
     }
@@ -239,9 +227,6 @@ class Game extends React.Component{
     dragDrop(card){
         dropTargetId=card.code;
         dropTargetValue=card.value;
-       if(playerOutToggle){
-        this.playerOutMatch()
-       }else{
        if(checkForMatch(selectedValue,dropTargetValue)){
         console.log("match");
         this.playerHandMatch();
@@ -249,29 +234,16 @@ class Game extends React.Component{
            console.log("not a match")
        }
     }
-    }
-    dragPOStart(ev){
-        if(this.state.playerOut.length<1){
-            return null;
-        }
-        console.log("player out")
-        if(this.checkForValidMove(this.state.playerHand,this.state.field)){
-        ev.preventDefault();
-        playerOutToggle=false;
-        }else{
-        playerOutToggle=true;
-        var length=this.state.playerOut.length;
-        selectedId=this.state.playerOut[length-1];
-        console.log(selectedId);
-        }
-    }
+    
    
     calculateWinner(){
         if(this.state.computerHand.length ==0 && this.state.computerDeck.length == 0){
-        return ("Computer Wins")
+        clearInterval(this.interval);
+        console.log("computer wins")
         }
         else if(this.state.playerHand.lenth ==0 && this.state.playerDeck.length==0){
-        return("You win!");
+        clearInterval(this.interval);
+        console.log("player wins")
         }
     }
     
@@ -358,15 +330,25 @@ class Game extends React.Component{
       }
     }
     compOut(){
-        if(this.state.computerOut.length>0){
+        let playerOutToggle=false;
+        if(this.checkForValidMove(this.state.playerHand,this.state.field)){
+            playerOutToggle=false;
+            }else{
+            playerOutToggle=true;
+            }
+
+        if(this.state.computerOut.length>0 && this.state.playerOut.length>0 && playerOutToggle==true){
+
         let newField=this.state.field.slice();
         let newOut =this.state.computerOut.slice();
-        let num = Math.round(getRandomInt(0,2));
-        console.log("random "+num);
-        newField[num]=newOut.pop();
+        let newPlayerOut=this.state.playerOut.slice();
+        newField[0]=newOut.pop();
+        newField[1]=newPlayerOut.pop();
+        console.log('SPEED');
         this.setState({
             field:newField.slice(),
-            computerOut:newOut.slice()
+            computerOut:newOut.slice(),
+            playerOut:newPlayerOut.slice()
         })
     }else{
         console.log('no more cards')
@@ -425,7 +407,6 @@ class Game extends React.Component{
               dragStart={card => this.dragStart(card)}
               dragOver={ev =>this.dragOver(ev)}
               dragDrop={card => this.dragDrop(card)}
-              dragPOStart={ev => this.dragPOStart(ev)}
           />
         </div>
         );
