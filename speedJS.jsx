@@ -222,7 +222,7 @@ class Game extends React.Component{
         
     }
     componentDidMount() {
-        this.interval = setInterval(() => this.intervalComp(), 2500);
+        this.interval = setInterval(() => this.intervalComp(), getRandomInt(4000,5000));
       }
     componentWillUnmount() {
         clearInterval(this.interval);
@@ -232,7 +232,6 @@ class Game extends React.Component{
         playerOutToggle=false;
         selectedId=card.code;
         selectedValue =card.value;
-        console.log(selectedValue);
     }
     dragOver(ev){
         ev.preventDefault();
@@ -240,7 +239,6 @@ class Game extends React.Component{
     dragDrop(card){
         dropTargetId=card.code;
         dropTargetValue=card.value;
-        console.log(dropTargetValue);
        if(playerOutToggle){
         this.playerOutMatch()
        }else{
@@ -253,7 +251,7 @@ class Game extends React.Component{
     }
     }
     dragPOStart(ev){
-        if(this.state.playerOut.length==undefined){
+        if(this.state.playerOut.length<1){
             return null;
         }
         console.log("player out")
@@ -279,9 +277,12 @@ class Game extends React.Component{
     
    playerHandMatch(){
     var newField=this.state.field.slice();
-    var newPlayerHand=this.state.playerHand.slice();
+    var filt=this.state.playerHand.slice();
     var newDeck=this.state.playerDeck.slice();
     var transfer;
+    var newPlayerHand = filt.filter(function(x) {
+        return x !== undefined;
+   });
     for(var i=0; i<newPlayerHand.length;i++){
         if(newPlayerHand[i].code== selectedId ){
             transfer= newPlayerHand.splice(i,1);
@@ -319,9 +320,12 @@ class Game extends React.Component{
    }
    checkForValidMove(hand,field){
      var bool=false;
-    for(var i=0; i< hand.length;i++){
+     var newHand= hand.filter(function(x) {
+        return x !== undefined;
+     });
+    for(var i=0; i< newHand.length;i++){
         for (var x=0;x<field.length;x++){
-            if(checkForMatch(hand[i].value, field[x].value)==true){
+            if(checkForMatch(newHand[i].value, field[x].value)==true){
                 console.log("you still have a move");
                 bool=true;
             }
@@ -331,13 +335,17 @@ class Game extends React.Component{
    }
    intervalComp(){ 
     var bool = true;
-    for(var i=0; i< this.state.computerHand.length;i++){
+    var filt =this.state.computerHand;
+    var newHand=filt.filter(function(x) {
+        return x !== undefined;
+   });
+    for(var i=0; i< newHand.length;i++){
     for (var x=0;x<this.state.field.length;x++){
-        var com =this.state.computerHand[i].value;
+        var com =newHand[i].value;
         var han =this.state.field[x].value;
         if(checkForMatch(com, han)==true){
             bool=false;
-            this.compHandMatch(this.state.computerHand[i].code,this.state.field[x].code);
+            this.compHandMatch(newHand[i].code,this.state.field[x].code);
             break;
          }
         }
@@ -350,6 +358,7 @@ class Game extends React.Component{
       }
     }
     compOut(){
+        if(this.state.computerOut.length>0){
         let newField=this.state.field.slice();
         let newOut =this.state.computerOut.slice();
         let num = Math.round(getRandomInt(0,2));
@@ -359,12 +368,18 @@ class Game extends React.Component{
             field:newField.slice(),
             computerOut:newOut.slice()
         })
+    }else{
+        console.log('no more cards')
+    }
     }
     compHandMatch(handID, fieldID){
-        let newHand=this.state.computerHand.slice();
+        let filt=this.state.computerHand.slice();
         let newDeck=this.state.computerDeck.slice();
         let newField=this.state.field.slice();
         let temp;
+        var newHand = filt.filter(function(x) {
+            return x !== undefined;
+       });
         for(var i=0; i<newHand.length; i++){
             if(newHand[i].code==handID){
                 temp= newHand.splice(i,1);
@@ -386,14 +401,27 @@ class Game extends React.Component{
     }
     //render Board
     render(){
+        var po;
+        var co;
+        if(this.state.playerOut.length>=1){
+            po=this.state.playerOut.length;
+        }else{
+            po=0;
+        }
+        if(this.state.computerOut.length>=1){
+            co=this.state.computerOut.length
+        }else{
+         co=0; 
+        }
+        
         return(
         <div className="board">
           <Board 
               playerHand={this.state.playerHand}
-              playerOutLength={this.state.playerOut.length}
+              playerOutLength={po}
               field={this.state.field}
               computerHand={this.state.computerHand}
-              computerOutLength={this.state.computerOut.length}
+              computerOutLength={co}
               dragStart={card => this.dragStart(card)}
               dragOver={ev =>this.dragOver(ev)}
               dragDrop={card => this.dragDrop(card)}
@@ -409,4 +437,3 @@ class Game extends React.Component{
         <Game />,
         document.getElementById('root'),
     ); 
-
