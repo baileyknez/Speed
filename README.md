@@ -4,3 +4,6 @@ This shall use the deck of cards API
 
 Currently a work in process
 A personal project.
+
+
+https://baileyknez.github.io/Speed/
