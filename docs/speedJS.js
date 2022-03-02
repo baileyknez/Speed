@@ -1,3 +1,4 @@
+
 import GameMatch from "./speedSetUp.js"
 
 const game =GameMatch();
@@ -6,12 +7,11 @@ let dropTargetId;
 let selectedValue;
 let dropTargetValue;
 let interval;
-
 function PlayerCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     
     return(
-    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDragStart={props.dragStart} onDragOver={props.dragOver}>
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDragStart={props.dragStart} onDragOver={props.dragOver} onTouchStart={props.dragStart}   >
        {image}
     </div>
     
@@ -20,7 +20,7 @@ function PlayerCard(props){
 function FieldCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     return(
-    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDrop={props.dragDrop} onDragOver={props.dragOver}>
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDrop={props.dragDrop} onDragOver={props.dragOver} onTouchStart={props.dragDrop}>
        {image}
     </div>
     
@@ -237,6 +237,7 @@ class Game extends React.Component{
      dragStart(card){
         selectedId=card.code;
         selectedValue =card.value;
+        console.log(selectedId);
     }
     dragOver(ev){
         ev.preventDefault();
@@ -244,6 +245,7 @@ class Game extends React.Component{
     dragDrop(card){
         dropTargetId=card.code;
         dropTargetValue=card.value;
+        console.log(dropTargetId)
        if(checkForMatch(selectedValue,dropTargetValue)){
         console.log("match");
         this.playerHandMatch();
@@ -251,7 +253,6 @@ class Game extends React.Component{
            console.log("not a match")
        }
     }
-    
    
     
     
