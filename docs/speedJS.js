@@ -1,12 +1,11 @@
 import GameMatch from "./speedSetUp.js"
 
 const game =GameMatch();
-console.log(game);
 let selectedId;
 let dropTargetId;
 let selectedValue;
 let dropTargetValue;
-
+let interval;
 
 function PlayerCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
@@ -43,6 +42,7 @@ function Blank(props){
     )
 }
 
+
 function checkForMatch(selectedValue, dropTargetValue){
     var value=selectedValue;
     var drop=dropTargetValue;
@@ -78,15 +78,12 @@ function checkForMatch(selectedValue, dropTargetValue){
         console.log("ace"+value +""+ drop)
         return true;
     }else if(value == higher){
-        console.log(higher);
         console.log("higher "+value +" "+ higher)
         return true;
     }else if(value == lower){
-        console.log(lower);
         console.log("lower "+value +" "+ lower)
         return true;
     }else{
-        console.log(value +" "+ drop)
         return false;
     }
 }
@@ -162,6 +159,24 @@ class Board extends React.Component{
             return(null);
         }   
     }
+    renderComputerDeck(){
+        if(this.props.computerDeckLength >0){
+            return(
+            <Blank
+            name="ComputerDeck"
+            />
+            );
+        }
+    }
+    renderPlayerDeck(){
+        if(this.props.playerDeckLength >0){
+            return(
+            <Blank
+            name="playerDeck"
+            />
+            );
+        }
+    }
    
     render(){
         return(
@@ -210,12 +225,12 @@ class Game extends React.Component{
         };
         
     }
-    componentDidMount() {
-        this.interval = setInterval(() => this.intervalComp(), getRandomInt(1000,5000));
+     startGame() {
+        interval = setInterval(() => this.intervalComp(), getRandomInt(1000,5000));
+        $(".gameStart").hide();
+        $(".game").show();
       }
-    componentWillUnmount() {
-        clearInterval(this.interval);
-     }
+    
     //drag and drop functionalit
      dragStart(card){
         selectedId=card.code;
@@ -236,16 +251,7 @@ class Game extends React.Component{
     }
     
    
-    calculateWinner(){
-        if(this.state.computerHand.length ==0 && this.state.computerDeck.length == 0){
-        clearInterval(this.interval);
-        console.log("computer wins")
-        }
-        else if(this.state.playerHand.lenth ==0 && this.state.playerDeck.length==0){
-        clearInterval(this.interval);
-        console.log("player wins")
-        }
-    }
+    
     
    playerHandMatch(){
     var newField=this.state.field.slice();
@@ -276,19 +282,19 @@ class Game extends React.Component{
     var newField=this.state.field;
     var newOut=this.state.playerOut.slice();
     var transfer=newOut.pop();
-    console.log(selectedId)
-    console.log(dropTargetId)
+   
        for(var i=0; i<newField.length;i++){
            if(newField[i].code ==dropTargetId){
               newField[i]=transfer;
-              console.log(newField);
            }
        }
        this.setState({
         playerOut:newOut.slice(),
         field:newField.slice()
     })
-
+    if(calculateWinner(this.state.computerHand,this.state.computerDeck,this.state.playerHand,this.state.playerDeck)){
+        return;
+    }
    }
    checkForValidMove(hand,field){
      var bool=false;
@@ -306,6 +312,9 @@ class Game extends React.Component{
     return bool;
    }
    intervalComp(){ 
+    if(calculateWinner(this.state.computerHand,this.state.computerDeck,this.state.playerHand,this.state.playerDeck)){
+        return;
+    }
     var bool = true;
     var filt =this.state.computerHand;
     var newHand=filt.filter(function(x) {
@@ -379,12 +388,31 @@ class Game extends React.Component{
             computerDeck:newDeck.slice(),
             computerHand:newHand.slice()
         })
-
+        if(calculateWinner(this.state.computerHand,this.state.computerDeck,this.state.playerHand,this.state.playerDeck)){
+            return;
+        }
+    }
+    playAgain(){
+        let again = GameMatch();
+        this.setState({
+        field:again.fd,
+         playerHand:again.playerHand,
+         playerDeck:again.playerDeck,
+         computerHand:again.computerHand,
+         computerDeck:again.computerDeck,
+         playerOut:again.playerOut,
+         computerOut:again.computerOut
+        });
+        $(".gameEnd").hide();
+        $(".game").show();
+        interval = setInterval(() => this.intervalComp(), getRandomInt(1000,5000));
     }
     //render Board
     render(){
         var po;
         var co;
+        var winner=calculateWinner(this.state.computerHand,this.state.computerDeck,this.state.playerHand,this.state.playerDeck);
+        
         if(this.state.playerOut.length>=1){
             po=this.state.playerOut.length;
         }else{
@@ -395,25 +423,73 @@ class Game extends React.Component{
         }else{
          co=0; 
         }
-        
+        let status;
+        if(winner){
+        status =winner+ " Wins";
+        $('.game').hide();
+        $('.gameEnd').show();
+        } else{
+            status="";
+        }
         return(
         <div className="board">
+        <div className="gameStart">
+            <h1>Welcome to Speed</h1>
+            <p>The Goal of the game is simple.</p>
+            <ol>
+                <li>Each Player gets a five card hand and a fifteen card deck</li>
+                <li>When a player plays a card from their deck they will pick up a card from their deck</li>
+                <li>Get rid of your cards by matching the cards in the center by either one higher or one lower</li>
+                <li>Aces are equal to 1 and Ace to make a circle</li>
+                <li>If there are no moves left the computer will draw two new cards</li>
+                <li>Get rid of your hand and deck before the computer can</li>
+            </ol>
+            <div className="difficulty">
+            <input type="radio" className="rate" id="Easy" name="rating" value="Easy"/>
+            <label htmlFor="Easy">Easy</label>
+            <input type="radio" className="rate" id="Medium" name="rating" value="Medium"/>
+            <label  htmlFor="Medium">Medium</label>
+            <input type="radio" className="rate" id="Hard" name="rating" value="Hard"/>
+            <label  htmlFor="Hard">Hard</label>
+            </div>
+            <br/>
+             <button onClick={()=>this.startGame()}>Start Game</button>
+        </div>
           <Board 
               playerHand={this.state.playerHand}
               playerOutLength={po}
               field={this.state.field}
               computerHand={this.state.computerHand}
+              computerDeckLength={this.state.computerDeck.length}
+              playerDeckLength={this.state.playerDeck.length}
               computerOutLength={co}
               dragStart={card => this.dragStart(card)}
               dragOver={ev =>this.dragOver(ev)}
               dragDrop={card => this.dragDrop(card)}
           />
+        <div className="gameEnd">
+        <div className="winner"><h1>{status}</h1></div>
+        <button onClick={()=>this.playAgain()}>Play Again?</button>
+        </div>
         </div>
         );
     }
     
 }
-
+function calculateWinner(computerHand,computerDeck,playerHand,playerDeck){
+    if((computerHand==[undefined]||computerHand[0]==undefined) && (computerDeck==[undefined]||computerDeck[0]==undefined)){
+    clearInterval(interval);
+    
+    return "Computer";
+    }
+    else if((playerHand ==[undefined]||playerHand[0]==undefined) && (playerDeck==[undefined] || playerDeck[0]==undefined)){
+    clearInterval(interval);
+    return "Player";
+    }
+    else{
+        return null;
+    }
+}
     ReactDOM.render(
         <Game />,
         document.getElementById('root'),
