@@ -17,3 +17,32 @@
     width:10vw;
     height:15vw ;
 }
+.winner{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;    
+}
+.gameEnd{
+    display:none;
+}
+.board{
+    display:flex;
+    align-items: center;
+    flex-direction: column;
+}
+.gameStart{
+    width:80vw;
+    height: 90vh;
+    display:flex;
+    align-items: center;
+    flex-direction: column; 
+}
+.game{
+    display:none;
+}
+.container{
+    display:flex;
+    align-items: center;
+    flex-direction: column;
+    align-items: center;
+}
