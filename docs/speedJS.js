@@ -181,6 +181,7 @@ class Board extends React.Component{
     render(){
         return(
             <div className="game">
+            <div className="container">
             <div className="hand">
            {this.renderComputer(0)}
            {this.renderComputer(1)}
@@ -206,6 +207,7 @@ class Board extends React.Component{
            {this.renderPlayer(2)}
            {this.renderPlayer(3)}
            {this.renderPlayer(4)}
+           </div>
            </div>
            </div>
         )
@@ -409,20 +411,7 @@ class Game extends React.Component{
     }
     //render Board
     render(){
-        var po;
-        var co;
         var winner=calculateWinner(this.state.computerHand,this.state.computerDeck,this.state.playerHand,this.state.playerDeck);
-        
-        if(this.state.playerOut.length>=1){
-            po=this.state.playerOut.length;
-        }else{
-            po=0;
-        }
-        if(this.state.computerOut.length>=1){
-            co=this.state.computerOut.length
-        }else{
-         co=0; 
-        }
         let status;
         if(winner){
         status =winner+ " Wins";
@@ -457,12 +446,12 @@ class Game extends React.Component{
         </div>
           <Board 
               playerHand={this.state.playerHand}
-              playerOutLength={po}
+              playerOutLength={this.state.playerOut.length}
               field={this.state.field}
               computerHand={this.state.computerHand}
               computerDeckLength={this.state.computerDeck.length}
               playerDeckLength={this.state.playerDeck.length}
-              computerOutLength={co}
+              computerOutLength={this.state.computerOut.length}
               dragStart={card => this.dragStart(card)}
               dragOver={ev =>this.dragOver(ev)}
               dragDrop={card => this.dragDrop(card)}
@@ -490,7 +479,7 @@ function calculateWinner(computerHand,computerDeck,playerHand,playerDeck){
         return null;
     }
 }
-    ReactDOM.render(
-        <Game />,
-        document.getElementById('root'),
-    ); 
+ReactDOM.render(
+    <Game />,
+    document.getElementById('root'),
+); 
