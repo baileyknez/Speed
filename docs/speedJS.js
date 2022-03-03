@@ -12,11 +12,12 @@ let min=2000;
 let max=4000;
 let computerWinCount=0;
 let playerWinCount=0;
+let moving=null;
 function PlayerCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     
     return(
-    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDragStart={props.dragStart} onDragOver={props.dragOver} onTouchStart={props.dragStart} onMouseDown={props.dragStart}   >
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDragStart={props.dragStart} onDragOver={props.dragOver} onTouchStart={props.touchStart} >
        {image}
     </div>
 
@@ -25,7 +26,7 @@ function PlayerCard(props){
 function FieldCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     return(
-    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDrop={props.dragDrop} onDragOver={props.dragOver} onTouchStart={props.dragDrop} onMouseDown={props.dragDrop}>
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDrop={props.dragDrop} onDragOver={props.dragOver} onTouchStart={props.dragStart} onTouchEnd={props.touchEnd} onMouseUp={props.touchEnd}>
        {image}
     </div>
     
@@ -34,7 +35,7 @@ function FieldCard(props){
 function Card(props){
     var image= <img className="card" src="backOfCard.png" alt={props.card.value}/>
     return(
-    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value}>
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onTouchMove={props.touchMove}>
        {image}
     </div>
     
@@ -43,7 +44,7 @@ function Card(props){
 
 function Blank(props){
     return(
-            <img className="card" src="backOfCard.png" alt={props.Name}/>
+            <img className="card" src="backOfCard.png" alt={props.Name} onTouchMove={props.touchMove}/>
     )
 }
 
@@ -103,11 +104,12 @@ class Board extends React.Component{
             var v =this.props.field[i];
         return(
             <FieldCard 
-            name="Field"
+            name="FieldCard"
             drag="false"
             card={this.props.field[i]}
             dragOver={(ev) =>this.props.dragOver(ev)}
             dragDrop={()=>this.props.dragDrop(v)}
+            touchEnd={(ev)=>this.props.touchEnd(ev, v)}
             />
         );  
         }
@@ -122,6 +124,8 @@ class Board extends React.Component{
                 card={this.props.playerHand[i]}
                 dragStart= {() =>this.props.dragStart(v)}
                 dragOver={(ev)=>this.props.dragOver(ev)}
+                touchStart={(ev)=>this.props.touchStart(ev, v)}
+                touchMove={(ev)=>this.props.touchMove(ev)}
                 />
             );
             }else{
@@ -135,6 +139,7 @@ class Board extends React.Component{
                 name="Computer"
                 drag="false"
                 card={this.props.computerHand[i]}
+                touchMove={(ev)=>this.props.touchMove(ev)}
                 />
             );  
             }else{
@@ -147,6 +152,7 @@ class Board extends React.Component{
                 <Blank
                     name=""
                     drag="true"
+                    touchMove={(ev)=>this.props.touchMove(ev)}
                 />
             );
         }else{
@@ -169,6 +175,7 @@ class Board extends React.Component{
             return(
             <Blank
             name="ComputerDeck"
+           
             />
             );
         }
@@ -185,9 +192,9 @@ class Board extends React.Component{
    
     render(){
         return(
-            <div className="game">
-            <div className="container">
-            <div className="hand">
+            <div className="game" onMouseMove={(ev)=>this.props.touchMove(ev)} onTouchMove={(ev)=>this.props.touchMove(ev)}>
+            <span className="container" onTouchEnd={(ev)=>this.props.touchEnd(ev,null)} onMouseUp={(ev)=>this.props.touchEnd(ev,null)}>
+            <div className="hand"  >
            {this.renderComputer(0)}
            {this.renderComputer(1)}
            {this.renderComputer(2)}
@@ -195,25 +202,19 @@ class Board extends React.Component{
            {this.renderComputer(4)}
            </div>
            <div className="field">
-           <div className="computerOut">
-               {this.renderComputerOut()}
-           </div>
+           {this.renderComputerOut()}
            {this.renderField(0)}
            {this.renderField(1)}
-           <div className="containerField">
-           <div className="playerOut">
-               {this.renderPlayerOut()}
+           {this.renderPlayerOut()}
            </div>
-           </div>
-           </div>
-           <div className="hand">
+           <div className="hand" >
            {this.renderPlayer(0)}
            {this.renderPlayer(1)}
            {this.renderPlayer(2)}
            {this.renderPlayer(3)}
            {this.renderPlayer(4)}
            </div>
-           </div>
+           </span>
            </div>
         )
     }
@@ -259,6 +260,57 @@ class Game extends React.Component{
        }else{
            console.log("not a match")
        }
+    }
+    touchStart(event, card){
+        selectedId=card.code;
+        selectedValue=card.value;
+        
+        moving=event.target;
+        $(moving).css({'position': 'fixed'});
+        $(selectedId).css({'height':'10vh'});
+        $(selectedId).css({'width': '5vw'});
+        $(moving).css({'zIndex': '-10'});
+        console.log(moving.style)
+    }
+    touchMove(event){
+        if(moving){
+        if (event.clientX) {
+            // mousemove
+            moving.style.left =event.clientX - moving.clientWidth/2;
+            moving.style.top = (event.clientY - moving.clientHeight/2);
+        } else {
+            // touchmove - assuming a single touchpoint
+            $(moving).css({'left': ''+event.changedTouches[0].clientX - moving.clientWidth/2});
+            $(moving).css({'top': ''+event.changedTouches[0].clientY - moving.clientHeight/2});
+        }
+        
+        
+    }
+    }
+    touchEnd(event,card){
+        if (moving) {
+            console.log(event.currentTarget);
+            console.log(card);
+           if(event.currentTarget.className == 'FieldCard'){
+               dropTargetId=card.code;
+               dropTargetValue=card.value;
+               if(checkForMatch(selectedValue,dropTargetValue)){
+                console.log("match");
+                this.playerHandMatch();
+               }else{
+                   console.log("not a match")
+               }
+
+           }
+            // reset our element
+            moving.style.left = '';
+            moving.style.top = '';
+            moving.style.height = '';
+            moving.style.width = '';
+            moving.style.position = '';
+            moving = null;
+        }
+
     }
    dificulty(value){
        console.log(value)
@@ -447,7 +499,7 @@ class Game extends React.Component{
             status="";
         }
         return(
-        <div className="board">
+        <div className="board" >
         <div className="gameStart">
             <h1>Welcome to Speed</h1>
             <p>The Goal of the game is simple.</p>
@@ -483,6 +535,9 @@ class Game extends React.Component{
               dragStart={card => this.dragStart(card)}
               dragOver={ev =>this.dragOver(ev)}
               dragDrop={card => this.dragDrop(card)}
+              touchStart={(ev, card)=>this.touchStart(ev,card)}
+              touchMove={ev=>this.touchMove(ev)}
+              touchEnd={(ev,card)=>this.touchEnd(ev,card)}
           />
         <div className="gameEnd">
         <div className="winner">
@@ -513,11 +568,13 @@ class Game extends React.Component{
 function calculateWinner(computerHand,computerDeck,playerHand,playerDeck){
     if((computerHand==[undefined]||computerHand[0]==undefined) && (computerDeck==[undefined]||computerDeck[0]==undefined)){
     clearInterval(interval);
+    clearInterval(clock);
     computerWinCount++;
     return "Computer";
     }
     else if((playerHand ==[undefined]||playerHand[0]==undefined) && (playerDeck==[undefined] || playerDeck[0]==undefined)){
     clearInterval(interval);
+    clearInterval(clock);
     playerWinCount++;
     return "Player";
     }
@@ -529,4 +586,3 @@ ReactDOM.render(
     <Game />,
     document.getElementById('root'),
 ); 
-
