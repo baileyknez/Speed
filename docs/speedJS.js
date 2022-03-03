@@ -26,7 +26,7 @@ function PlayerCard(props){
 function FieldCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     return(
-    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDrop={props.dragDrop} onDragOver={props.dragOver} onTouchStart={props.dragStart} onTouchEnd={props.touchEnd} onMouseUp={props.touchEnd}>
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDrop={props.dragDrop} onDragOver={props.dragOver} onTouchStart={props.dragStart} onTouchEnd={props.touchEnd} >
        {image}
     </div>
     
@@ -126,6 +126,7 @@ class Board extends React.Component{
                 dragOver={(ev)=>this.props.dragOver(ev)}
                 touchStart={(ev)=>this.props.touchStart(ev, v)}
                 touchMove={(ev)=>this.props.touchMove(ev)}
+                touchEnd={(ev)=>this.props.touchEnd(ev, null)}
                 />
             );
             }else{
@@ -192,8 +193,8 @@ class Board extends React.Component{
    
     render(){
         return(
-            <div className="game" onMouseMove={(ev)=>this.props.touchMove(ev)} onTouchMove={(ev)=>this.props.touchMove(ev)}>
-            <span className="container" onTouchEnd={(ev)=>this.props.touchEnd(ev,null)} onMouseUp={(ev)=>this.props.touchEnd(ev,null)}>
+            <div className="game" onTouchEnd={(ev)=>this.props.touchEnd(ev,null)} onTouchMove={(ev)=>this.props.touchMove(ev)} >
+            <span className="container" >
             <div className="hand"  >
            {this.renderComputer(0)}
            {this.renderComputer(1)}
@@ -201,7 +202,7 @@ class Board extends React.Component{
            {this.renderComputer(3)}
            {this.renderComputer(4)}
            </div>
-           <div className="field">
+           <div className="field" >
            {this.renderComputerOut()}
            {this.renderField(0)}
            {this.renderField(1)}
@@ -262,13 +263,22 @@ class Game extends React.Component{
        }
     }
     touchStart(event, card){
+        if(moving !== null){
+            $(moving).css({'left': ''});
+            $(moving).css({'top': ''});
+            $(moving).css({'position': 'relative'});
+            $(moving).css({'height':''});
+            $(moving).css({'width': ''});
+            $(moving).css({'zIndex': ''});   
+            moving = null;    
+        }
         selectedId=card.code;
         selectedValue=card.value;
         
         moving=event.target;
         $(moving).css({'position': 'fixed'});
-        $(selectedId).css({'height':'10vh'});
-        $(selectedId).css({'width': '5vw'});
+        $(moving).css({'height':'10vh'});
+        $(moving).css({'width': '5vw'});
         $(moving).css({'zIndex': '-10'});
         console.log(moving.style)
     }
@@ -298,19 +308,26 @@ class Game extends React.Component{
                 console.log("match");
                 this.playerHandMatch();
                }else{
-                   console.log("not a match")
+                $(moving).css({'left': ''});
+                $(moving).css({'top': ''});
+                $(moving).css({'position': 'relative'});
+                $(moving).css({'height':''});
+                $(moving).css({'width': ''});
+                $(moving).css({'zIndex': ''});   
+                moving = null;
+                console.log("not a match")
                }
-
+               $(moving).css({'left': ''});
+               $(moving).css({'top': ''});
+               $(moving).css({'position': 'relative'});
+               $(moving).css({'height':''});
+               $(moving).css({'width': ''});
+               $(moving).css({'zIndex': ''});   
+               moving = null;
            }
-            // reset our element
-            moving.style.left = '';
-            moving.style.top = '';
-            moving.style.height = '';
-            moving.style.width = '';
-            moving.style.position = '';
-            moving = null;
+            
         }
-
+       
     }
    dificulty(value){
        console.log(value)
