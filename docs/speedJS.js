@@ -6,8 +6,12 @@ let dropTargetId;
 let selectedValue;
 let dropTargetValue;
 let interval;
+let clock;
+let time=0;
 let min=2000;
 let max=4000;
+let computerWinCount=0;
+let playerWinCount=0;
 function PlayerCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     
@@ -229,7 +233,9 @@ class Game extends React.Component{
         
     }
      startGame() {
+        time=0;
         interval = setInterval(() => this.intervalComp(), getRandomInt(min,max));
+        clock= setInterval(()=>this.timer(),1000);
         $(".gameStart").hide();
         $(".game").show();
       }
@@ -271,7 +277,9 @@ class Game extends React.Component{
        }
        console.log(min, max);
    }
-    
+   timer(){
+       time++;
+   }
     
    playerHandMatch(){
     var newField=this.state.field.slice();
@@ -461,6 +469,8 @@ class Game extends React.Component{
             </div>
             <br/>
              <button onClick={()=>this.startGame()}>Start Game</button>
+           <br/>
+             <a href="https://baileyknez.github.io/BaileyKnez/index.html"><img src="logo.png" alt="BaileyKnez"/></a>
         </div>
           <Board 
               playerHand={this.state.playerHand}
@@ -477,7 +487,22 @@ class Game extends React.Component{
         <div className="gameEnd">
         <div className="winner">
         <h1>{status}</h1>
+        <h2>Time: {time}</h2>
+        <h2>Player: {playerWinCount}</h2>
+        <h2>Computer: {computerWinCount}</h2>
+        
+        <div className="difficulty">
+            <input type="radio" className="rate" id="Easy" name="rating" value="Easy" onClick={()=>this.dificulty("Easy")} />
+            <label htmlFor="Easy">Easy</label>
+            <input type="radio" className="rate" id="Medium" name="rating" value="Medium" onClick={()=>this.dificulty("Medium")}/>
+            <label  htmlFor="Medium">Medium</label>
+            <input type="radio" className="rate" id="Hard" name="rating" value="Hard" onClick={()=>this.dificulty("Hard")}/>
+            <label  htmlFor="Hard">Hard</label>
+        </div>
+        <br/>
         <button onClick={()=>this.playAgain()}>Play Again?</button>
+        <br/>
+        <a href="https://baileyknez.github.io/BaileyKnez/index.html"><img src="logo.png" alt="BaileyKnez"/></a>
         </div>
         </div>
         </div>
@@ -488,11 +513,12 @@ class Game extends React.Component{
 function calculateWinner(computerHand,computerDeck,playerHand,playerDeck){
     if((computerHand==[undefined]||computerHand[0]==undefined) && (computerDeck==[undefined]||computerDeck[0]==undefined)){
     clearInterval(interval);
-    
+    computerWinCount++;
     return "Computer";
     }
     else if((playerHand ==[undefined]||playerHand[0]==undefined) && (playerDeck==[undefined] || playerDeck[0]==undefined)){
     clearInterval(interval);
+    playerWinCount++;
     return "Player";
     }
     else{
@@ -503,5 +529,4 @@ ReactDOM.render(
     <Game />,
     document.getElementById('root'),
 ); 
-
 
