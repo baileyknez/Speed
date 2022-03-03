@@ -15,7 +15,7 @@ function PlayerCard(props){
     <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDragStart={props.dragStart} onDragOver={props.dragOver} onTouchStart={props.dragStart} onMouseDown={props.dragStart}   >
        {image}
     </div>
-    
+
     );
 }
 function FieldCard(props){
@@ -503,4 +503,5 @@ ReactDOM.render(
     <Game />,
     document.getElementById('root'),
 ); 
+
 
