@@ -193,16 +193,16 @@ class Board extends React.Component{
    
     render(){
         return(
-            <div className="game" onTouchEnd={(ev)=>this.props.touchEnd(ev,null)} onTouchMove={(ev)=>this.props.touchMove(ev)} >
+            <div className="game" onTouchMove={(ev)=>this.props.touchMove(ev)}>
             <span className="container" >
-            <div className="hand"  >
+            <div className="hand">
            {this.renderComputer(0)}
            {this.renderComputer(1)}
            {this.renderComputer(2)}
            {this.renderComputer(3)}
            {this.renderComputer(4)}
            </div>
-           <div className="field" >
+           <div className="field"  onTouchEnd={(ev)=>this.props.touchEnd(ev,null)}>
            {this.renderComputerOut()}
            {this.renderField(0)}
            {this.renderField(1)}
@@ -280,7 +280,6 @@ class Game extends React.Component{
         $(moving).css({'height':'10vh'});
         $(moving).css({'width': '5vw'});
         $(moving).css({'zIndex': '-10'});
-        console.log(moving.style)
     }
     touchMove(event){
         if(moving){
@@ -299,8 +298,6 @@ class Game extends React.Component{
     }
     touchEnd(event,card){
         if (moving) {
-            console.log(event.currentTarget);
-            console.log(card);
            if(event.currentTarget.className == 'FieldCard'){
                dropTargetId=card.code;
                dropTargetValue=card.value;
@@ -330,7 +327,6 @@ class Game extends React.Component{
        
     }
    dificulty(value){
-       console.log(value)
        if(value =="Easy"){
            min=4000;
            max=5000;
@@ -344,7 +340,6 @@ class Game extends React.Component{
            max=1000;
            
        }
-       console.log(min, max);
    }
    timer(){
        time++;
