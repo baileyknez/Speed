@@ -1,4 +1,3 @@
-
 import GameMatch from "./speedSetUp.js"
 
 const game =GameMatch();
@@ -7,11 +6,13 @@ let dropTargetId;
 let selectedValue;
 let dropTargetValue;
 let interval;
+let min=2000;
+let max=4000;
 function PlayerCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     
     return(
-    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDragStart={props.dragStart} onDragOver={props.dragOver} onTouchStart={props.dragStart}   >
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDragStart={props.dragStart} onDragOver={props.dragOver} onTouchStart={props.dragStart} onMouseDown={props.dragStart}   >
        {image}
     </div>
     
@@ -20,7 +21,7 @@ function PlayerCard(props){
 function FieldCard(props){
     var image= <img className="card" src={props.card.URL} alt={props.card.value}/>
     return(
-    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDrop={props.dragDrop} onDragOver={props.dragOver} onTouchStart={props.dragDrop}>
+    <div draggable={props.drag} className= {props.name} id={props.card.code} value={props.card.value} onDrop={props.dragDrop} onDragOver={props.dragOver} onTouchStart={props.dragDrop} onMouseDown={props.dragDrop}>
        {image}
     </div>
     
@@ -228,7 +229,7 @@ class Game extends React.Component{
         
     }
      startGame() {
-        interval = setInterval(() => this.intervalComp(), getRandomInt(1000,5000));
+        interval = setInterval(() => this.intervalComp(), getRandomInt(min,max));
         $(".gameStart").hide();
         $(".game").show();
       }
@@ -253,7 +254,23 @@ class Game extends React.Component{
            console.log("not a match")
        }
     }
-   
+   dificulty(value){
+       console.log(value)
+       if(value =="Easy"){
+           min=4000;
+           max=5000;
+       }
+       else if(value=="Medium"){
+           min=2000;
+           max=4000;
+       }
+       else if(value=="Hard"){
+           min=1000;
+           max=1000;
+           
+       }
+       console.log(min, max);
+   }
     
     
    playerHandMatch(){
@@ -408,7 +425,7 @@ class Game extends React.Component{
         });
         $(".gameEnd").hide();
         $(".game").show();
-        interval = setInterval(() => this.intervalComp(), getRandomInt(1000,5000));
+        interval = setInterval(() => this.intervalComp(), getRandomInt(min,max));
     }
     //render Board
     render(){
@@ -435,11 +452,11 @@ class Game extends React.Component{
                 <li>Get rid of your hand and deck before the computer can</li>
             </ol>
             <div className="difficulty">
-            <input type="radio" className="rate" id="Easy" name="rating" value="Easy"/>
+            <input type="radio" className="rate" id="Easy" name="rating" value="Easy" onClick={()=>this.dificulty("Easy")} />
             <label htmlFor="Easy">Easy</label>
-            <input type="radio" className="rate" id="Medium" name="rating" value="Medium"/>
+            <input type="radio" className="rate" id="Medium" name="rating" value="Medium" onClick={()=>this.dificulty("Medium")}/>
             <label  htmlFor="Medium">Medium</label>
-            <input type="radio" className="rate" id="Hard" name="rating" value="Hard"/>
+            <input type="radio" className="rate" id="Hard" name="rating" value="Hard" onClick={()=>this.dificulty("Hard")}/>
             <label  htmlFor="Hard">Hard</label>
             </div>
             <br/>
@@ -458,8 +475,10 @@ class Game extends React.Component{
               dragDrop={card => this.dragDrop(card)}
           />
         <div className="gameEnd">
-        <div className="winner"><h1>{status}</h1></div>
+        <div className="winner">
+        <h1>{status}</h1>
         <button onClick={()=>this.playAgain()}>Play Again?</button>
+        </div>
         </div>
         </div>
         );
@@ -484,3 +503,4 @@ ReactDOM.render(
     <Game />,
     document.getElementById('root'),
 ); 
+
